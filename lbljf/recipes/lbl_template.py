@@ -13,6 +13,7 @@ import os
 import warnings
 
 import numpy as np
+import joblib
 
 from lbljf.core import base
 from lbljf.core import base_classes
@@ -54,6 +55,43 @@ DESCRIPTION_TEMPLATE = 'Use this code to create the LBL template'
 # =============================================================================
 # Define functions
 # =============================================================================
+
+def E2DS_to_S1D(filename, it, inst, calib_dir, blaze, sci_table, wavegrid,
+                berv, flux_cube, weight_cube):
+    # select the first science file as a reference file
+    sci_image, sci_hdr = inst.load_science_file(filename)
+    # get wave solution for reference file
+    sci_wave = inst.get_wave_solution(filename, sci_image, sci_hdr)
+    # load blaze (just ones if not needed)
+    if blaze is None:
+        bargs = [filename, sci_image, sci_hdr, calib_dir]
+        bout = inst.load_blaze_from_science(*bargs, normalize=False)
+        blazeimage, blaze_flag = bout
+    else:
+        blaze_flag = False
+        blazeimage = np.array(blaze)
+
+    # get the berv
+    berv[it] = inst.get_berv(sci_hdr)
+    # populate science table
+    sci_table = inst.populate_sci_table(filename, sci_table, sci_hdr,
+                                        berv=berv)
+
+    # apply berv if required
+    if berv[it] != 0.0:
+        sci_wave = mp.doppler_shift(sci_wave, -berv[it])
+    # set exactly zeros to NaNs
+    sci_image[sci_image == 0] = np.nan
+    # compute s1d from e2ds
+    s1d_flux, s1d_weight = apero.e2ds_to_s1d(inst.params, sci_wave,
+                                             sci_image, blazeimage,
+                                             wavegrid)
+    # push into arrays
+    flux_cube[:, it] = s1d_flux
+    weight_cube[:, it] = s1d_weight
+    return 1
+
+
 def main(**kwargs):
     """
     Wrapper around __main__ recipe code (deals with errors and loads instrument
@@ -113,6 +151,14 @@ def __main__(inst: InstrumentsType, **kwargs):
     template_dir, science_dir = dparams['TEMPLATE_DIR'], dparams['SCIENCE_DIR']
     calib_dir = dparams['CALIB_DIR']
     # -------------------------------------------------------------------------
+    # step 1.1: set up joblib memmap directory
+    mmap_folder = './joblib_memmap'
+    try:
+        os.mkdir(mmap_folder)
+    except FileExistsError:
+        pass
+    # -------------------------------------------------------------------------
+
     # Step 2: Check and set filenames
     # -------------------------------------------------------------------------
     # template filename
@@ -162,51 +208,100 @@ def __main__(inst: InstrumentsType, **kwargs):
     # Step 5: Loop around each file and load into cube
     # -------------------------------------------------------------------------
     # create a cube that contains one line for each file
-    flux_cube = np.zeros([len(wavegrid), len(science_files)])
+    # OLD: flux_cube = np.zeros([len(wavegrid), len(science_files)])
+    flux_cube_file_mmap = os.path.join(mmap_folder, 'flux_cube_mmap')
+    _i = 1
+    while(os.path.exists(flux_cube_file_mmap)):
+        flux_cube_file_mmap += f'_{_i}'
+        _i += 1
+
+    flux_cube = np.memmap(flux_cube_file_mmap, dtype=float,
+                          shape=(len(wavegrid), len(science_files)), mode='w+')
     # weight cube to account for order overlap
-    weight_cube = np.zeros([len(wavegrid), len(science_files)])
+    # OLD: weight_cube = np.zeros([len(wavegrid), len(science_files)])
+    weight_cube_file_mmap = os.path.join(mmap_folder, 'weight_cube_mmap')
+    _i = 1
+    while(os.path.exists(weight_cube_file_mmap)):
+        weight_cube_file_mmap += f'_{_i}'
+        _i += 1
+
+    weight_cube = np.memmap(weight_cube_file_mmap, dtype=float,
+                            shape=(len(wavegrid), len(science_files)), mode='w+')
+
     # science table
     sci_table = dict()
     # all bervs
-    berv = np.zeros_like(science_files, dtype=float)
-    # loop around files
-    for it, filename in enumerate(science_files):
-        # print progress
-        msg = 'Processing E2DS->S1D for file {0} of {1}'
-        margs = [it + 1, len(science_files)]
-        log.general(msg.format(*margs))
-        # select the first science file as a reference file
-        sci_image, sci_hdr = inst.load_science_file(filename)
-        # get wave solution for reference file
-        sci_wave = inst.get_wave_solution(filename, sci_image, sci_hdr)
-        # load blaze (just ones if not needed)
-        if blaze is None:
-            bargs = [filename, sci_image, sci_hdr, calib_dir]
-            bout = inst.load_blaze_from_science(*bargs, normalize=False)
-            blazeimage, blaze_flag = bout
-        else:
-            blaze_flag = False
-            blazeimage = np.array(blaze)
-        # deal with not having blaze (for s1d weighting)
-        if blaze_flag:
-            sci_image, blazeimage = inst.no_blaze_corr(sci_image, sci_wave)
-        # get the berv
-        berv[it] = inst.get_berv(sci_hdr)
-        # populate science table
-        sci_table = inst.populate_sci_table(filename, sci_table, sci_hdr,
-                                            berv=berv[it])
-        # apply berv if required
-        if berv[it] != 0.0:
-            sci_wave = mp.doppler_shift(sci_wave, -berv[it])
-        # set exactly zeros to NaNs
-        sci_image[sci_image == 0] = np.nan
-        # compute s1d from e2ds
-        s1d_flux, s1d_weight = apero.e2ds_to_s1d(inst.params, sci_wave,
-                                                 sci_image, blazeimage,
-                                                 wavegrid)
-        # push into arrays
-        flux_cube[:, it] = s1d_flux
-        weight_cube[:, it] = s1d_weight
+    berv_file_mmap = os.path.join(mmap_folder, 'berv_mmap')
+    _i = 1
+    while(os.path.exists(berv_file_mmap)):
+        berv_file_mmap += f'_{_i}'
+        _i += 1
+
+    berv = np.memmap(berv_file_mmap, dtype=float, shape=np.shape(science_files),
+                     mode='w+')
+    # 
+    msg = 'Processing E2DS->S1D for {0} files'
+
+    import time
+    start = time.time()
+
+    if 1: # parallel
+        ncpus = len(os.sched_getaffinity(0))
+        ncpus = min(ncpus, 16)
+        msg += ' in parallel on {1} cores'
+        log.general(msg.format(len(science_files), ncpus))
+        # loop around files
+        res = base.ProgressParallel(ncpus, verbose=0)(
+            joblib.delayed(E2DS_to_S1D)(f, it, inst, calib_dir, blaze, sci_table, wavegrid, 
+                                        berv, flux_cube, weight_cube)
+            for it, f in enumerate(science_files)
+        )
+
+    else:
+        log.general(msg.format(len(science_files)))
+        # loop around files
+        for it, filename in tqdm(enumerate(science_files), total=len(science_files)):
+            # select the first science file as a reference file
+            sci_image, sci_hdr = inst.load_science_file(filename)
+            # get wave solution for reference file
+            sci_wave = inst.get_wave_solution(filename, sci_image, sci_hdr)
+            # load blaze (just ones if not needed)
+            if blaze is None:
+                bargs = [filename, sci_image, sci_hdr, calib_dir]
+                bout = inst.load_blaze_from_science(*bargs, normalize=False)
+                blazeimage, blaze_flag = bout
+            else:
+                blaze_flag = False
+                blazeimage = np.array(blaze)
+            # deal with not having blaze (for s1d weighting)
+            if blaze_flag:
+                sci_image, blazeimage = inst.no_blaze_corr(sci_image, sci_wave)
+
+            # sci_image, sci_hdr, sci_wave, blazeimage = \
+            #     E2DS_to_S1D(filename, inst, calib_dir, blaze)
+
+            # get the berv
+            berv[it] = inst.get_berv(sci_hdr)
+            # populate science table
+            sci_table = inst.populate_sci_table(filename, sci_table, sci_hdr,
+                                                berv=berv[it])
+
+            # apply berv if required
+            if berv[it] != 0.0:
+                sci_wave = mp.doppler_shift(sci_wave, -berv[it])
+            # set exactly zeros to NaNs
+            sci_image[sci_image == 0] = np.nan
+            # compute s1d from e2ds
+            s1d_flux, s1d_weight = apero.e2ds_to_s1d(inst.params, sci_wave,
+                                                    sci_image, blazeimage,
+                                                    wavegrid)
+            # push into arrays
+            flux_cube[:, it] = s1d_flux
+            weight_cube[:, it] = s1d_weight
+
+    end = time.time()
+    log.general(f'Took {end - start:.2f} seconds')
+
     # -------------------------------------------------------------------------
     # Step 6. Creation of the template
     # -------------------------------------------------------------------------
@@ -327,14 +422,17 @@ def __main__(inst: InstrumentsType, **kwargs):
             # to get statistics on the ber-bin rms, we need more than 3
             # bervbins
             log.general('computation done per-berv bin')
-            p16, p50, p84 = np.nanpercentile(flux_cube_bervbin, [16, 50, 84],
-                                             axis=1)
+            # p16, p50, p84 = np.nanpercentile(flux_cube_bervbin, [16, 50, 84], axis=1)
+            # typically more than 500x faster than np.nanpercentile
+            p16, p50, p84 = mp.nan_percentile(flux_cube, [16, 50, 84], axis=1)
         else:
             # if too few berv bins, we take stats on whole cube rather than
             #    per-bervbin
             log.general('computation done per-file, not per-berv bin')
-            p16, p50, p84 = np.nanpercentile(flux_cube, [16, 50, 84],
-                                             axis=1)
+            # p16, p50, p84 = np.nanpercentile(flux_cube, [16, 50, 84], axis=1)
+            # typically more than 500x faster than np.nanpercentile
+            p16, p50, p84 = mp.nan_percentile(flux_cube, [16, 50, 84], axis=1)
+
         # calculate the rms of each wavelength element
         rms = (p84 - p16) / 2
 
@@ -347,6 +445,16 @@ def __main__(inst: InstrumentsType, **kwargs):
                  total_nobs_berv=total_nobs_berv, template_nobs=nfiles)
     # write table
     inst.write_template(template_file, props, refhdr, sci_table)
+
+    # clean-up the joblib memmap
+    #import shutil
+    try:
+        os.remove(flux_cube_file_mmap)
+        os.remove(weight_cube_file_mmap)
+        os.remove(berv_file_mmap)
+        #shutil.rmtree(mmap_folder)
+    except:
+        log.warning('Could not clean-up automatically.')
 
     # -------------------------------------------------------------------------
     # return local namespace
