@@ -9,15 +9,15 @@ Created on 2021-03-15
 
 @author: cook
 """
-from lbl.recipes import lbl_reset
-from lbl.recipes import lbl_compute
-from lbl.recipes import lbl_compile
-from lbl.recipes import lbl_template
-from lbl.recipes import lbl_mask
-from lbl.recipes import lbl_noise
-from lbl.recipes import lbl_telluclean
-from lbl.recipes import lbl_wrap
-from lbl.recipes import lbl_demo
+from lbljf.recipes import lbl_reset
+from lbljf.recipes import lbl_compute
+from lbljf.recipes import lbl_compile
+from lbljf.recipes import lbl_template
+from lbljf.recipes import lbl_mask
+from lbljf.recipes import lbl_noise
+from lbljf.recipes import lbl_telluclean
+from lbljf.recipes import lbl_wrap
+from lbljf.recipes import lbl_demo
 
 # =============================================================================
 # Start of code

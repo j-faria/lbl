@@ -17,21 +17,21 @@ from typing import Any, Dict, List, Union
 
 import yaml
 
-from lbl.core import base
-from lbl.core import base_classes
-from lbl.core import io
-from lbl.core import logger
-from lbl.core import parameters
-from lbl.instruments import carmenes
-from lbl.instruments import default
-from lbl.instruments import espresso
-from lbl.instruments import harps
-from lbl.instruments import harpsn
-from lbl.instruments import sophie
-from lbl.instruments import nirps
-from lbl.instruments import spirou
-from lbl.instruments import maroonx
-from lbl.resources import lbl_misc
+from lbljf.core import base
+from lbljf.core import base_classes
+from lbljf.core import io
+from lbljf.core import logger
+from lbljf.core import parameters
+from lbljf.instruments import carmenes
+from lbljf.instruments import default
+from lbljf.instruments import espresso
+from lbljf.instruments import harps
+from lbljf.instruments import harpsn
+from lbljf.instruments import sophie
+from lbljf.instruments import nirps
+from lbljf.instruments import spirou
+from lbljf.instruments import maroonx
+from lbljf.resources import lbl_misc
 
 # =============================================================================
 # Define variables

@@ -14,10 +14,10 @@ import shutil
 from pathlib import Path
 from typing import Any, Dict, Union
 
-from lbl.core import base
-from lbl.core import base_classes
-from lbl.core import io
-from lbl.core import logger
+from lbljf.core import base
+from lbljf.core import base_classes
+from lbljf.core import io
+from lbljf.core import logger
 
 # =============================================================================
 # Define variables

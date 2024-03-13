@@ -13,8 +13,8 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from astropy.table import Table
 
-from lbl.core import base
-from lbl.core import logger
+from lbljf.core import base
+from lbljf.core import logger
 
 # =============================================================================
 # Define variables

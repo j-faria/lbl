@@ -13,13 +13,13 @@ import os
 
 import numpy as np
 
-from lbl.core import base
-from lbl.core import base_classes
-from lbl.core import io
-from lbl.core import math as mp
-from lbl.instruments import select
-from lbl.resources import lbl_misc
-from lbl.science import general
+from lbljf.core import base
+from lbljf.core import base_classes
+from lbljf.core import io
+from lbljf.core import math as mp
+from lbljf.instruments import select
+from lbljf.resources import lbl_misc
+from lbljf.science import general
 
 # =============================================================================
 # Define variables

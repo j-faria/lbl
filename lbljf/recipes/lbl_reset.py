@@ -11,11 +11,11 @@ Created on 2021-08-24
 """
 import os
 
-from lbl.core import base
-from lbl.core import base_classes
-from lbl.core import io
-from lbl.instruments import select
-from lbl.resources import lbl_misc
+from lbljf.core import base
+from lbljf.core import base_classes
+from lbljf.core import io
+from lbljf.instruments import select
+from lbljf.resources import lbl_misc
 
 # =============================================================================
 # Define variables

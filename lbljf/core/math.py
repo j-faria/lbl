@@ -20,8 +20,8 @@ from scipy import signal
 from scipy.interpolate import InterpolatedUnivariateSpline as IUVSpline
 from scipy.special import erf
 
-from lbl.core import base
-from lbl.core import base_classes
+from lbljf.core import base
+from lbljf.core import base_classes
 
 # try to import bottleneck module
 # noinspection PyBroadException

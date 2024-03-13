@@ -14,7 +14,7 @@ from typing import List, Union
 
 from astropy.time import Time
 
-from lbl.core import base
+from lbljf.core import base
 
 # =============================================================================
 # Define variables

@@ -14,10 +14,10 @@ from typing import Tuple
 
 import numpy as np
 
-from lbl.core import base
-from lbl.core import base_classes
-from lbl.core import math as mp
-from lbl.instruments import select
+from lbljf.core import base
+from lbljf.core import base_classes
+from lbljf.core import math as mp
+from lbljf.instruments import select
 
 # =============================================================================
 # Define variables

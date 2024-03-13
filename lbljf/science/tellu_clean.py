@@ -17,14 +17,14 @@ import numpy as np
 from astropy import constants
 from astropy.table import Table
 
-from lbl.core import base
-from lbl.core import base_classes
-from lbl.core import io
-from lbl.core import math as mp
-from lbl.instruments import default
-from lbl.instruments import select
-from lbl.science import general
-from lbl.science import plot
+from lbljf.core import base
+from lbljf.core import base_classes
+from lbljf.core import io
+from lbljf.core import math as mp
+from lbljf.instruments import default
+from lbljf.instruments import select
+from lbljf.science import general
+from lbljf.science import plot
 
 # =============================================================================
 # Define variables

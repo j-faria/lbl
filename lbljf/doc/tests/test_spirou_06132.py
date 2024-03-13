@@ -12,7 +12,7 @@ from lbl import lbl_compil
 from lbl import lbl_compute
 from lbl import lbl_mask
 from lbl import lbl_template
-from lbl.recipes import lbl_find
+from lbljf.recipes import lbl_find
 
 
 # =============================================================================

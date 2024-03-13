@@ -17,11 +17,11 @@ import numpy as np
 import requests
 from astropy.table import Table
 
-from lbl.core import base
-from lbl.core import base_classes
-from lbl.core import io
-from lbl.core import math as mp
-from lbl.instruments import default
+from lbljf.core import base
+from lbljf.core import base_classes
+from lbljf.core import io
+from lbljf.core import math as mp
+from lbljf.instruments import default
 
 # =============================================================================
 # Define variables

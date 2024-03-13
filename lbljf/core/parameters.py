@@ -9,8 +9,8 @@ Created on 2021-03-15
 """
 from typing import Any, Tuple
 
-from lbl.core import base
-from lbl.core import base_classes
+from lbljf.core import base
+from lbljf.core import base_classes
 
 # =============================================================================
 # Define variables

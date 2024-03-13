@@ -15,11 +15,11 @@ from typing import List, Union
 import numpy as np
 from astropy.table import Table, vstack
 
-from lbl.core import base
-from lbl.core import base_classes
-from lbl.core import parameters
-from lbl.instruments import select
-from lbl.resources import lbl_misc
+from lbljf.core import base
+from lbljf.core import base_classes
+from lbljf.core import parameters
+from lbljf.instruments import select
+from lbljf.resources import lbl_misc
 
 # =============================================================================
 # Define variables

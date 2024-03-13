@@ -11,14 +11,14 @@ Created on 2021-03-19
 """
 import sys
 
-from lbl.core import base
-from lbl.core import base_classes
-from lbl.recipes import lbl_compile
-from lbl.recipes import lbl_compute
-from lbl.recipes import lbl_mask
-from lbl.recipes import lbl_telluclean
-from lbl.recipes import lbl_template
-from lbl.resources import lbl_misc
+from lbljf.core import base
+from lbljf.core import base_classes
+from lbljf.recipes import lbl_compile
+from lbljf.recipes import lbl_compute
+from lbljf.recipes import lbl_mask
+from lbljf.recipes import lbl_telluclean
+from lbljf.recipes import lbl_template
+from lbljf.resources import lbl_misc
 
 __NAME__ = 'lbl_mask.py'
 __STRNAME__ = 'LBL Mask'

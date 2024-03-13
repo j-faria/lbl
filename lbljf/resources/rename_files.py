@@ -5,8 +5,8 @@ import sys
 import os
 import shutil
 
-from lbl.core import base
-from lbl.core import base_classes
+from lbljf.core import base
+from lbljf.core import base_classes
 
 
 # =============================================================================

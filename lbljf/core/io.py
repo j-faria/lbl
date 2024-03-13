@@ -23,8 +23,8 @@ import wget
 from astropy.io import fits
 from astropy.table import Table
 
-from lbl.core import base
-from lbl.core import base_classes
+from lbljf.core import base
+from lbljf.core import base_classes
 
 # =============================================================================
 # Define variables

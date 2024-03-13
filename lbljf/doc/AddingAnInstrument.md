@@ -41,7 +41,7 @@ Add your instrument (no spaces or punctuation other than underscores)
 First add an import similar to the following:
 
 ```python 
-from lbl.instruments import {instrument_name}
+from lbljf.instruments import {instrument_name}
 ```
 
 where `{instrument name}` is the lower case version of the one added to
