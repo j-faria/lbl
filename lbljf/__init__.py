@@ -5,8 +5,8 @@ Created on 2021-03-15
 
 @author: cook
 """
-from lbl.core import base
-from lbl import recipes
+from lbljf.core import base
+from lbljf import recipes
 
 __NAME__ = 'lbl'
 __STRNAME__ = 'LBL'
